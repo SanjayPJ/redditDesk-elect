@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <title>Reddit Clone - Details</title>
+  </head>
+  <body>
+        <div class="container mt-3" id="main">
+            <div style="height: 95vh; width: 100%;" id="loading">
+                <div class="content text-center">
+                    <p>Fetching post... </p><i class="fa fa-circle-o-notch fa-spin" style="font-size:30px; opacity: 0.5;"></i>
+                </div>
+            </div>
+            <div id="post-container">
+                <!-- <div class="text-uppercase mb-1 text-muted"><small><strong>~ Lorem, ipsum.</strong></small></div>
+                <h5 class="bold mt-2 mb-4">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam, laborum.</h5>   
+                <img class="img-fluid w-100 mb-5" src="https://picsum.photos/200/300" alt="">  -->
+            </div>
+        </div>
+
+    <script>
+        const { remote } = require('electron');
+        const axios = require('axios'); 
+        
+        const subreddit = remote.getCurrentWindow().subreddit;
+
+        console.log(subreddit);
+
+        const postId = remote.getCurrentWindow().postId;
+        let mainPost;
+
+        const postContainer = document.getElementById('post-container');
+
+        axios.get('https://www.reddit.com/r/' + subreddit + '/comments/' + postId + '.json').then((res) => {
+
+            document.getElementById('loading').style.display = 'none';
+            mainPost = res.data[0].data.children[0].data;
+
+            console.log(mainPost)
+
+            postContainer.innerHTML = `<div class="text-uppercase mb-1 text-muted"><small><strong>~ ${mainPost.author}</strong></small></div>
+                <h5 class="bold mt-2 mb-4">${mainPost.title}</h5>   
+                <img class="img-fluid w-100 mb-5" src="${mainPost.url}" alt=""> 
+            
+            `
+        });
+
+
+    </script>
+  </body>
+</html>

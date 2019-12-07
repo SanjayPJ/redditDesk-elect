@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+
+    <title>Reddit Clone - Settings</title>
+  </head>
+  <body>
+        <div class="container mt-3" id="main">
+            <div class="content" style="width: 300px;">
+                <form id="submitReddit">
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Name of subreddit</label>
+                        <input type="text" class="form-control" id="subreddit" aria-describedby="emailHelp">
+                        <small id="emailHelp" class="form-text text-muted">Eg: <b>aww</b></small>
+                    </div>
+                    <button class="btn btn-block btn-primary">Save changes</button>
+                </form>
+            </div>
+        </div>
+        <script>
+                const { remote } = require('electron');
+                const subreddit = remote.getCurrentWindow().subreddit;
+                const ipc = require('electron').ipcRenderer
+
+                document.getElementById('subreddit').value = subreddit;
+
+                const submitRedditForm = document.getElementById('submitReddit');
+
+                submitRedditForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    ipc.send('update:subreddit', e.target[0].value);
+                    window.close();
+                })
+
+        </script>
+  </body>
+</html>

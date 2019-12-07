@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+    <title>Reddit Clone</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="container mt-3" id="main">
+      <div style="height: 95vh; width: 100%;" id="loading">
+        <div class="content text-center">
+            <p>Fetching reddit data... </p><i class="fa fa-circle-o-notch fa-spin" style="font-size:30px; opacity: 0.5;"></i>
+        </div>
+      </div>
+      <ul class="list-group list-group-flush" id="post-container"></ul>
+    </div>
+    <!-- You can also require other files to run in this process -->
+    <script src="./renderer.js"></script>
+    <script>
+      const axios = require('axios');  
+      const ipc = require('electron').ipcRenderer
+
+      const postContainer = document.getElementById('post-container');
+
+      const { remote } = require('electron');
+      const subreddit = remote.getCurrentWindow().subreddit;
+
+      console.log(subreddit);
+
+      axios.get('https://www.reddit.com/r/' + subreddit + '.json').then((res) => {
+        const posts = res.data.data.children;
+
+        document.getElementById('loading').style.display = 'none';
+        posts.map((post, index) => {
+          postContainer.innerHTML += `<li class="list-group-item" onClick="showPost('${post.data.id}')">
+              <div class="media">
+                <img src="${post.data.thumbnail}" class="mr-3 user-thumbnail rounded" alt="...">
+                <div class="media-body">
+                  ${post.data.title}
+                </div>
+              </div>
+          </li>`;
+        })
+      });
+
+      let showPost = (id) => {
+        ipc.send('open:details', id);
+      }
+    </script>
+  </body>
+</html>
