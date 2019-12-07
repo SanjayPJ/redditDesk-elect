@@ -26,10 +26,18 @@
         </div>
         <script>
                 const { remote } = require('electron');
-                const subreddit = remote.getCurrentWindow().subreddit;
+                let subreddit;
                 const ipc = require('electron').ipcRenderer
 
-                document.getElementById('subreddit').value = subreddit;
+                var sqlite3 = require('sqlite3').verbose();
+                var db = new sqlite3.Database('database.db');
+
+                db.serialize(function() {
+                    db.each("SELECT info FROM subreddit LIMIT 1", (err, row) =>  {
+                        subreddit = row.info;
+                        document.getElementById('subreddit').value = subreddit;
+                    });
+                });
 
                 const submitRedditForm = document.getElementById('submitReddit');
 

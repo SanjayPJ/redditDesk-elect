@@ -26,16 +26,59 @@
       const axios = require('axios');  
       const ipc = require('electron').ipcRenderer
 
+      var sqlite3 = require('sqlite3').verbose();
+      var db = new sqlite3.Database('database.db');
+
       const postContainer = document.getElementById('post-container');
 
       const { remote } = require('electron');
-      const subreddit = remote.getCurrentWindow().subreddit;
+      // const subreddit = remote.getCurrentWindow().subreddit;
 
-      console.log(subreddit);
+      let subreddit;
 
-      axios.get('https://www.reddit.com/r/' + subreddit + '.json').then((res) => {
-        const posts = res.data.data.children;
+      // console.log(subreddit);
 
+      db.serialize(() => {
+          sql = "CREATE TABLE IF NOT EXISTS reddit (id TEXT, data TEXT)";
+          db.run(sql);
+
+          db.each("SELECT info FROM subreddit LIMIT 1", (err, row) =>  {
+              subreddit = row.info;
+              console.log('Fetching subreddit name from database...')
+
+              console.log(subreddit);
+
+              // sql = "INSERT INTO reddit (id, data) VALUES ('" + subreddit + "', 'ewrwere')";
+              // db.run(sql);
+
+              db.each("SELECT COUNT(data) AS count FROM reddit WHERE id='" + subreddit + "' LIMIT 1;", (err, data) => {
+                if(data.count != 0){
+                  console.log("Fetching data from database...")
+                  sql = `SELECT data FROM reddit WHERE id='${subreddit}' LIMIT 1;`;
+                  db.each(sql, (err, data) => {
+                    let dbGetData = JSON.parse(unescape(data.data));
+                    populateInterface(dbGetData);
+                  })
+                }else{
+                  console.log("There is no data inside database...");
+                  console.log("Fetching data from reddit api...")
+                  axios.get('https://www.reddit.com/r/' + subreddit + '.json').then((res) => {
+                    populateInterface(res.data.data.children);
+
+                    console.log("Storing data into database for future use...")
+                    jsonString = JSON.stringify(res.data.data.children);
+                    const escapedString = escape(jsonString);
+
+                    sql = `INSERT INTO reddit (id, data) VALUES ('${subreddit}', '${escapedString}');`;
+                    // console.log(sql)
+                    db.run(sql);
+                  });
+                }
+              });
+          });
+      });
+
+      let populateInterface = (posts) => {
         document.getElementById('loading').style.display = 'none';
         posts.map((post, index) => {
           postContainer.innerHTML += `<li class="list-group-item" onClick="showPost('${post.data.id}')">
@@ -47,7 +90,7 @@
               </div>
           </li>`;
         })
-      });
+      }
 
       let showPost = (id) => {
         ipc.send('open:details', id);
