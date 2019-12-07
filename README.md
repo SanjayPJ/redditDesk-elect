@@ -1,3 +1,3 @@
 # redditDesk-elect
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot.PNG)
