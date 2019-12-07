@@ -41,8 +41,6 @@ function createDetailsWindow (arg) {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true
     },
-    parent: mainWindow,
-    modal: true, 
   })
 
   // Custom variables
